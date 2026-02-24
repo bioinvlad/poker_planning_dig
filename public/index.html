@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Poker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="index-page">
+
+  <div class="index-hero">
+    <span class="index-logo-p">P</span>
+    <h1>Planning Poker</h1>
+    <p>Fast, simple estimation for agile teams</p>
+  </div>
+
+  <div class="index-grid">
+
+    <!-- Create Room -->
+    <div class="index-card">
+      <div class="index-card-title">
+        <div class="card-icon card-icon-create">✦</div>
+        Create a Room
+      </div>
+      <form id="createForm">
+        <div class="form-group">
+          <label for="createName">Your name</label>
+          <input
+            type="text"
+            id="createName"
+            class="form-control"
+            placeholder="e.g. Alice"
+            maxlength="30"
+            autocomplete="off"
+            required
+          >
+        </div>
+        <div style="margin-top: 1.1rem;">
+          <button type="submit" class="btn btn-primary" style="width: 100%;">
+            Create Room
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Join Room -->
+    <div class="index-card">
+      <div class="index-card-title">
+        <div class="card-icon card-icon-join">↗</div>
+        Join a Room
+      </div>
+      <form id="joinForm">
+        <div class="form-group">
+          <label for="joinName">Your name</label>
+          <input
+            type="text"
+            id="joinName"
+            class="form-control"
+            placeholder="e.g. Bob"
+            maxlength="30"
+            autocomplete="off"
+            required
+          >
+        </div>
+        <div class="form-group" style="margin-top: 0.75rem;">
+          <label for="roomCode">Room code</label>
+          <input
+            type="text"
+            id="roomCode"
+            class="form-control"
+            placeholder="e.g. A1B2C3"
+            maxlength="6"
+            autocomplete="off"
+            style="text-transform: uppercase; letter-spacing: 3px; font-family: 'Courier New', monospace; font-weight: 700;"
+            required
+          >
+        </div>
+        <div style="margin-top: 1.1rem;">
+          <button
+            type="submit"
+            class="btn btn-primary"
+            style="width: 100%; background: #7c3aed;"
+          >
+            Join Room
+          </button>
+        </div>
+      </form>
+    </div>
+
+  </div>
+
+  <div id="errorMsg" class="index-error"></div>
+
+  <script>
+    // Restore name from previous visit
+    const saved = sessionStorage.getItem('pp_name');
+    if (saved) {
+      document.getElementById('createName').value = saved;
+      document.getElementById('joinName').value = saved;
+    }
+
+    function showError(msg) {
+      document.getElementById('errorMsg').textContent = msg;
+    }
+
+    document.getElementById('createForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('createName').value.trim();
+      if (!name) return;
+      sessionStorage.setItem('pp_name',   name);
+      sessionStorage.setItem('pp_action', 'create');
+      sessionStorage.removeItem('pp_room');
+      window.location.href = '/room.html';
+    });
+
+    document.getElementById('joinForm').addEventListener('submit', e => {
+      e.preventDefault();
+      const name = document.getElementById('joinName').value.trim();
+      const code = document.getElementById('roomCode').value.trim().toUpperCase();
+      if (!name || !code) return;
+      if (code.length !== 6) {
+        showError('Room code must be exactly 6 characters.');
+        return;
+      }
+      sessionStorage.setItem('pp_name',   name);
+      sessionStorage.setItem('pp_action', 'join');
+      sessionStorage.setItem('pp_room',   code);
+      window.location.href = '/room.html';
+    });
+
+    // Auto-uppercase room code input
+    document.getElementById('roomCode').addEventListener('input', function () {
+      const pos = this.selectionStart;
+      this.value = this.value.toUpperCase();
+      this.setSelectionRange(pos, pos);
+    });
+  </script>
+</body>
+</html>

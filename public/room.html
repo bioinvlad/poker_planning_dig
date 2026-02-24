@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Planning Poker — Room</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="room-page">
+
+  <!-- Connecting state -->
+  <div id="connectingScreen" class="status-screen">
+    <div class="spinner"></div>
+    <span>Connecting…</span>
+  </div>
+
+  <!-- Error state -->
+  <div id="errorScreen" class="error-screen" style="display:none;">
+    <h2>Connection Error</h2>
+    <p id="errorText">Could not connect to the server.</p>
+    <a href="/" class="btn btn-primary">Back to Home</a>
+  </div>
+
+  <!-- Main app (shown after joining) -->
+  <div id="app" style="display:none; flex-direction:column; min-height:100vh;">
+
+    <!-- Header -->
+    <header class="room-header">
+      <div class="header-brand">
+        <span class="brand-p">P</span>
+        Planning Poker
+      </div>
+
+      <button id="roomCodeBtn" class="room-code-btn" title="Click to copy room code">
+        <span id="roomCodeVal" class="room-code-val">------</span>
+        <span class="room-code-hint">copy</span>
+      </button>
+
+      <div class="header-user">
+        <span id="headerName"></span>
+        <span id="modBadge" class="mod-badge" style="display:none;">Moderator</span>
+        <button id="btnLeave" class="btn-leave" title="Leave session">✕ Leave</button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <main class="room-main">
+
+      <!-- Current task -->
+      <section class="panel" id="taskPanel">
+        <!-- Empty: no tasks loaded -->
+        <div id="stateEmpty" class="task-placeholder">
+          No tasks loaded. Upload a CSV file to start the session.
+        </div>
+        <!-- Done: all tasks estimated -->
+        <div id="stateDone" class="task-done-msg" style="display:none;">
+          <span class="done-emoji">🎉</span>
+          <h3>All tasks estimated!</h3>
+          <p>Great session, team!</p>
+        </div>
+        <!-- Active task -->
+        <div id="stateTask" style="display:none;">
+          <div class="task-meta">
+            <span id="taskKey" class="task-key">PROJ-0</span>
+            <span id="taskProgress" class="task-progress">1 of 1</span>
+          </div>
+          <p id="taskSummary" class="task-summary">Task summary</p>
+        </div>
+      </section>
+
+      <!-- Voting cards -->
+      <section class="panel" id="cardsPanel">
+        <div class="panel-label">Cast your vote</div>
+        <div class="vote-cards" id="voteCards">
+          <!-- Built by JS -->
+        </div>
+      </section>
+
+      <!-- Players & votes -->
+      <section class="panel">
+        <div class="players-header">
+          <div class="panel-label" style="margin-bottom:0;">Players</div>
+          <span id="voteStats" class="vote-stats"></span>
+        </div>
+        <div class="players-grid" id="playersGrid">
+          <!-- Built by JS -->
+        </div>
+      </section>
+
+      <!-- Moderator controls -->
+      <div class="controls-panel" id="controlsPanel" style="display:none;">
+        <span class="controls-title">Controls</span>
+
+        <button class="btn btn-secondary btn-sm" id="btnUpload">
+          📄 Upload CSV
+        </button>
+        <input type="file" id="csvInput" accept=".csv" style="display:none;">
+
+        <button class="btn btn-success btn-sm" id="btnReveal" disabled>
+          👁 Reveal
+        </button>
+        <button class="btn btn-secondary btn-sm" id="btnReset">
+          ↺ Reset
+        </button>
+
+        <div class="controls-sep"></div>
+
+        <button class="btn btn-secondary btn-sm" id="btnPrev">← Prev</button>
+        <button class="btn btn-primary btn-sm" id="btnNext">Next →</button>
+      </div>
+
+      <!-- Task list -->
+      <section class="panel" id="taskListPanel" style="display:none;">
+        <div class="task-list-header">
+          <div class="panel-label" style="margin-bottom:0;">All Tasks</div>
+          <span id="taskListStats" class="task-list-stats"></span>
+        </div>
+        <div class="task-list" id="taskList">
+          <!-- Built by JS -->
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- Disconnected overlay -->
+  <div id="disconnectOverlay" class="overlay" style="display:none;">
+    <div class="overlay-box">
+      <h2>Disconnected</h2>
+      <p>You've been disconnected from the session.</p>
+      <a href="/" class="btn btn-primary">Back to Home</a>
+    </div>
+  </div>
+
+  <!-- Toast notification -->
+  <div id="toast" style="display:none;"></div>
+
+  <script src="room.js"></script>
+</body>
+</html>

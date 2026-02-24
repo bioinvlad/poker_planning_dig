@@ -1,0 +1,15 @@
+Planning Poker — Internal Team Tool
+A simple browser-based planning poker tool for agile estimation sessions.
+What it does
+The team opens a shared room in the browser, uploads a task list exported from Jira as CSV, and runs a planning poker session together. Each participant votes on the effort of each task using Fibonacci cards. Votes are hidden until the moderator reveals them all at once. After discussion, the team moves to the next task.
+Key constraints
+
+No registration or login
+No data is saved — everything exists only during the session
+Works in any modern browser
+One command to start the server
+
+Who uses it
+A small agile team: one moderator (Scrum Master or team lead) who controls the session, and players who vote. The moderator imports tasks, controls reveal and moves between issues. Players just vote.
+Out of scope
+No Jira API integration, no session history, no mobile app.
