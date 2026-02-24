@@ -278,6 +278,29 @@ body {
   font-family: inherit;
 }
 
+.header-center {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.btn-share {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--muted);
+  padding: 5px 10px;
+  border-radius: var(--radius);
+  font-size: 0.775rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+.btn-share:hover {
+  border-color: var(--primary);
+  color: var(--primary);
+}
+
 .header-user {
   display: flex;
   align-items: center;
@@ -739,4 +762,14 @@ body {
   background: var(--surface-2);
   border: 1px solid var(--border);
   color: var(--success);
+}
+
+/* ===== Outlier highlighting ===== */
+.player-card.outlier {
+  border-color: var(--danger);
+}
+
+.player-vote-chip.outlier-chip {
+  border-color: var(--danger);
+  color: var(--danger);
 }

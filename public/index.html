@@ -99,6 +99,15 @@
       document.getElementById('joinName').value = saved;
     }
 
+    // Pre-fill room code if arriving via share link (?room=ABCDEF)
+    const urlRoom = new URLSearchParams(location.search).get('room');
+    if (urlRoom && urlRoom.length === 6) {
+      document.getElementById('roomCode').value = urlRoom.toUpperCase();
+      document.getElementById('joinName').focus();
+      // Scroll join card into view on mobile
+      document.getElementById('joinForm').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
     function showError(msg) {
       document.getElementById('errorMsg').textContent = msg;
     }

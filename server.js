@@ -132,7 +132,8 @@ wss.on('connection', ws => {
       case 'vote': {
         const room = rooms.get(ws.roomId);
         if (!room || !ws.player || room.revealed) return;
-        if (room.currentTaskIndex >= room.tasks.length) return;
+        // Allow voting when there are no tasks at all; block only when past the task list
+        if (room.tasks.length > 0 && room.currentTaskIndex >= room.tasks.length) return;
         ws.player.voted = true;
         ws.player.voteValue = String(msg.value || '').slice(0, 10);
         broadcast(room, buildRoomState(room));

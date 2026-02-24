@@ -1,6 +1,9 @@
 // ===== Constants =====
 const CARDS = ['0', '1', '2', '3', '5', '8', '13', '21', '?', '☕'];
 
+// Fibonacci positions for outlier detection (skipping ≥2 steps → outlier)
+const FIB_POS = new Map([[0,0],[1,1],[2,2],[3,3],[5,4],[8,5],[13,6],[21,7]]);
+
 // ===== State =====
 let ws          = null;
 let roomState   = null;
@@ -40,6 +43,7 @@ const el = {
   disconnectOverlay:$('disconnectOverlay'),
   toast:            $('toast'),
   btnLeave:         $('btnLeave'),
+  btnShare:         $('btnShare'),
   taskListPanel:    $('taskListPanel'),
   taskList:         $('taskList'),
   taskListStats:    $('taskListStats'),
@@ -149,8 +153,8 @@ function render() {
     el.taskProgress.textContent = `${currentTaskIndex + 1} of ${tasks.length}`;
   }
 
-  // Vote cards
-  const votingAllowed = hasTask && !revealed;
+  // Vote cards — allowed when not revealed and session is not "done"
+  const votingAllowed = !revealed && !isDone;
   el.voteCards.querySelectorAll('.vote-card-btn').forEach(btn => {
     btn.disabled = !votingAllowed;
     btn.classList.toggle('selected', votingAllowed && btn.dataset.value === myVote);
@@ -185,34 +189,31 @@ function render() {
   // Moderator controls
   if (isModerator) {
     const hasAnyVote = players.some(p => p.voted);
-    el.btnReveal.disabled = !hasAnyVote || revealed || !hasTask;
-    el.btnReset.disabled  = !hasTask && !isDone;
+    el.btnReveal.disabled = !hasAnyVote || revealed || isDone;
+    el.btnReset.disabled  = isDone;
     el.btnPrev.disabled   = currentTaskIndex <= 0 || tasks.length === 0;
     el.btnNext.disabled   = isDone || tasks.length === 0;
   }
 }
 
 function renderPlayers(players, revealed) {
-  // For consensus coloring after reveal
   const revealedNums = revealed
     ? players.filter(p => p.voted && !isNaN(Number(p.voteValue))).map(p => Number(p.voteValue))
     : [];
-  const sorted = [...revealedNums].sort((a, b) => a - b);
-  const median = sorted.length > 0 ? sorted[Math.floor(sorted.length / 2)] : null;
+  const outlierVals = revealed ? getOutlierValues(revealedNums) : new Set();
 
   el.playersGrid.innerHTML = players.map(player => {
     const isMe = player.id === myPlayerId;
-    let chipClass = 'empty';
+    let chipClass   = 'empty';
     let chipContent = '–';
     let cardClass   = '';
 
     if (revealed && player.voted) {
-      chipClass   = 'revealed';
+      const numVal  = Number(player.voteValue);
+      const outlier = !isNaN(numVal) && outlierVals.has(numVal);
+      chipClass   = outlier ? 'revealed outlier-chip' : 'revealed';
       chipContent = player.voteValue ?? '?';
-      if (median !== null && !isNaN(Number(player.voteValue))) {
-        const diff = Math.abs(Number(player.voteValue) - median);
-        cardClass = diff <= 2 ? 'agree' : 'spread';
-      }
+      cardClass   = outlier ? 'outlier' : '';
     } else if (player.voted) {
       chipClass   = 'back';
       chipContent = '';
@@ -225,6 +226,24 @@ function renderPlayers(players, revealed) {
       ${player.isModerator ? '<span class="player-mod-tag">Mod</span>' : ''}
     </div>`;
   }).join('');
+}
+
+// ===== Outlier detection =====
+// Highlight both min and max when they are NOT adjacent in the Fibonacci
+// sequence, i.e. the gap between their positions is ≥ 2 steps.
+// [5, 5, 8, 8] → gap 1 → no highlight
+// [3, 5, 8]    → gap 2 → highlight 3 and 8
+// [1, 5, 8]    → gap 4 → highlight 1 and 8
+function getOutlierValues(nums) {
+  if (nums.length < 2) return new Set();
+  const min = Math.min(...nums);
+  const max = Math.max(...nums);
+  if (min === max) return new Set();
+
+  const posMin = FIB_POS.has(min) ? FIB_POS.get(min) : min;
+  const posMax = FIB_POS.has(max) ? FIB_POS.get(max) : max;
+
+  return posMax - posMin >= 2 ? new Set([min, max]) : new Set();
 }
 
 // ===== Task list =====
@@ -293,6 +312,24 @@ function bindEvents() {
         document.execCommand('copy');
         document.body.removeChild(t);
         toast('Room code copied!', 'success');
+      });
+  });
+
+  // Share link
+  el.btnShare.addEventListener('click', () => {
+    const code = el.roomCodeVal.textContent;
+    if (!code || code === '------') return;
+    const url = `${location.origin}/?room=${code}`;
+    navigator.clipboard.writeText(url)
+      .then(() => toast('Join link copied!', 'success'))
+      .catch(() => {
+        const t = document.createElement('textarea');
+        t.value = url;
+        document.body.appendChild(t);
+        t.select();
+        document.execCommand('copy');
+        document.body.removeChild(t);
+        toast('Join link copied!', 'success');
       });
   });
 
